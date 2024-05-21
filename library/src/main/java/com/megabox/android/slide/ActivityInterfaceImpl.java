@@ -4,13 +4,15 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 /**
  * 这个类用来管理 activity 的栈
  *
  * @author lihong
  * @since 2016/10/28
  */
-class ActivityInterfaceImpl extends Activity implements ActivityInterface {
+class ActivityInterfaceImpl extends AppCompatActivity implements ActivityInterface {
 
     private Application.ActivityLifecycleCallbacks mActivityLifecycleCallbacks;
 

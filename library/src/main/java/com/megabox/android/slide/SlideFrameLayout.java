@@ -8,11 +8,11 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.v4.view.AccessibilityDelegateCompat;
-import android.support.v4.view.MotionEventCompat;
-import android.support.v4.view.ViewCompat;
-import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
-import android.support.v4.widget.ViewDragHelper;
+import androidx.core.view.AccessibilityDelegateCompat;
+import androidx.core.view.MotionEventCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+import androidx.customview.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
- * 处理向右滑动的逻辑，移动整个View，请参数{@link android.support.v4.widget.SlidingPaneLayout}
+ * 处理向右滑动的逻辑，移动整个View，请参数{link android.support.v4.widget.SlidingPaneLayout}
  *
  * @author lihong
  * @since 2016-3-10
@@ -182,7 +182,7 @@ class SlideFrameLayout extends ViewGroup {
 
         mDragHelper = ViewDragHelper.create(this, 0.5f, new DragHelperCallback());
         mDragHelper.setMinVelocity(dip2px(MIN_FLING_VELOCITY));
-        setEdgeSize(dip2px(20));
+        setEdgeSize(getResources().getDisplayMetrics().widthPixels);
 
         mPreviousSnapshotView = new PreviewView(context);
         addView(mPreviousSnapshotView, new LayoutParams(
@@ -787,7 +787,7 @@ class SlideFrameLayout extends ViewGroup {
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
         boolean result;
-        final int save = canvas.save(Canvas.CLIP_SAVE_FLAG);
+        final int save = canvas.save();
 
         if (mCanSlide && !lp.slideable && mSlideableView != null) {
             // Clip against the slider; no sense drawing what will immediately be covered.
@@ -1222,7 +1222,7 @@ class SlideFrameLayout extends ViewGroup {
         @Override
         public void run() {
             if (mChildView.getParent() == SlideFrameLayout.this) {
-                ViewCompat.setLayerType(mChildView, ViewCompat.LAYER_TYPE_NONE, null);
+                ViewCompat.setLayerType(mChildView, View.LAYER_TYPE_NONE, null);
                 invalidateChildRegion(mChildView);
             }
 
