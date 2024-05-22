@@ -16,7 +16,7 @@ import android.widget.TextView;
  * @author lihong
  * @since 2016/10/28
  */
-public class ListViewActivity extends ActionBarActivity {
+public class ListViewActivity extends YourBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

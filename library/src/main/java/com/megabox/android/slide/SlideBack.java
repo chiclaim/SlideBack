@@ -2,26 +2,37 @@ package com.megabox.android.slide;
 
 import android.app.Activity;
 import android.app.Application;
-import android.os.Bundle;
-import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.megabox.android.slide.utils.ViewHierarchyUtils;
-
 /**
- * 这个Activity实现了可以滑动左侧边缘退出Activity的功能，类似iOS的交互行为。
- *
- * <p>调用 {@link #setSlideable(boolean)} 方法来设置是否支持滑动 </p>
- * <p>调用 {@link #setPreviousActivitySlideFollow(boolean)}
- * 方法来设置前一个activity是否跟随滑动 </p>
- *
- * @author lihong
- * @since 2016/03/10
+ * 可以通过组合的方式集成 SlideBack 功能:
+ * <li> 在 Activity.onContentChanged 中调用 {@link SlideBack#attach()}</li>
+ * <li> 在 Activity.onDestroy 中调用 {@link SlideBack#detach()}</li>
+ * <pre>
+ * public abstract class YourBaseActivity extends AppCompatActivity {
+ *     private SlideBack slideBack;
+ *     protected void onCreate(@Nullable Bundle savedInstanceState) {
+ *         super.onCreate(savedInstanceState);
+ *         slideBack = new SlideBack(this);
+ *     }
+ *     public void enableSlideBack(boolean flag) {
+ *         slideBack.enableSlide(flag);
+ *     }
+ *     public void onContentChanged() {
+ *         super.onContentChanged();
+ *         slideBack.attach();
+ *     }
+ *     public void onDestroy() {
+ *         super.onDestroy();
+ *         slideBack.detach();
+ *     }
+ * }
+ * </pre>
  */
-public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFrameLayout.SlidingListener {
+public class SlideBack implements ISlideBack, SlideFrameLayout.SlidingListener {
     /**
      * DEBUG
      */
@@ -40,7 +51,7 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
     /**
      * 是否可以滑动
      */
-    private boolean mSlideable = true;
+    private boolean mSlidable = true;
 
     /**
      * 后面的Activity是否跟随滑动
@@ -50,7 +61,7 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
     /**
      * 是否打断调用{@link #finish()}方法
      */
-    private boolean mInterceptFinish = false;
+//    private boolean mInterceptFinish = false;
 
     /**
      * 前一个界面的activity
@@ -71,6 +82,12 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
      * SlideFrameLayout对象
      */
     private SlideFrameLayout mSlideFrameLayout;
+
+    private Activity activity;
+
+    public SlideBack(Activity activity) {
+        this.activity = activity;
+    }
 
 
     /**
@@ -97,55 +114,40 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
         }
     };
 
-    private void printHierarchy() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("SlideBackActivity", "-------------------\n" + ViewHierarchyUtils.getViewHierarchy(getWindow().getDecorView()));
-            }
-        }, 2000);
-
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        printHierarchy();
-    }
 
     /**
      * 使用 decorView，则支持系统自带的 ActionBar，如果使用 android.R.id.content，则需要将 Bar 做为布局的一部分
+     *
      * @param useDecorView boolean
      * @return
      */
     private ViewGroup getWrapContainer(boolean useDecorView) {
         if (useDecorView) {
-            return (ViewGroup) getWindow().getDecorView();
+            return (ViewGroup) activity.getWindow().getDecorView();
         }
-        return findViewById(android.R.id.content);
+        return activity.findViewById(android.R.id.content);
     }
 
     @Override
-    public void onContentChanged() {
-        super.onContentChanged();
-        if (mSlideable) {
+    public void attach() {
+        if (mSlidable) {
             // 如果找不到前一个activity的content view，则不能滑动，典型的场景就是由外部app打开单独的一界面
             // 例如从通知栏中打开消息中心界面，所以可能当前进程就一个消息中心的activity，此时就不能滑动退出
             View previewView = getPreviousActivityContentView();
             if (previewView == null) {
-                mSlideable = false;
+                mSlidable = false;
             }
         }
         // 如果不能侧滑，则不需要包一层 SlideFrameLayout
-        if (!mSlideable) {
+        if (!mSlidable) {
             return;
         }
 
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
         // 屏幕宽的-1/3
         mBackPreviewViewInitOffset = -(1.f / 3) * metrics.widthPixels;
 
-        mSlideFrameLayout = new SlideFrameLayout(this);
+        mSlideFrameLayout = new SlideFrameLayout(activity);
 //        int size = ViewGroup.LayoutParams.MATCH_PARENT;
         // 将内容View添加进容器中
 //        SlideFrameLayout.LayoutParams params = new SlideFrameLayout.LayoutParams(size, size);
@@ -153,7 +155,7 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
 
         // 初始化
         mSlideFrameLayout.setShadowResource(R.drawable.sliding_back_shadow);
-        mSlideFrameLayout.setSlideable(mSlideable);
+        mSlideFrameLayout.setSlideable(mSlidable);
         mSlideFrameLayout.setSlidingListener(this);
 
         final ViewGroup decorView = getWrapContainer(true);
@@ -165,7 +167,6 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
         decorView.addView(mSlideFrameLayout);
         mSlideFrameLayout.addView(decorChild);
 
-        printHierarchy();
     }
 
 //    @Override
@@ -206,13 +207,13 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
     @Override
     public void onPanelSlide(View panel, float slideOffset) {
         if (slideOffset <= 0) {
-            mInterceptFinish = false;
+//            mInterceptFinish = false;
             offsetPreviousSnapshot(0);
         } else if (slideOffset < 1) {
-            mInterceptFinish = true;
+//            mInterceptFinish = true;
             offsetPreviousSnapshot(mBackPreviewViewInitOffset * (1 - slideOffset));
         } else {
-            mInterceptFinish = false;
+//            mInterceptFinish = false;
             offsetPreviousSnapshot(0);
 
             // Modified by lihong 2016/09/11 begin
@@ -228,7 +229,7 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
             // 记录需要关闭当前界面的flag
             mNeedFinishActivityFlag = true;
             // 作一个延迟任务，确保当前 activity 是始终能被关闭的
-            mSlideFrameLayout.postDelayed(mFinishTask, 500);
+            mSlideFrameLayout.postDelayed(mFinishTask, 400);
             //finish();
             //overridePendingTransition(0, 0);
             //
@@ -246,16 +247,16 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
         }
     }
 
-    @Override
-    public void finish() {
-        if (!mInterceptFinish) {
-            super.finish();
-        }
-    }
+//    TODO 看是否需要支持
+//    @Override
+//    public void finish() {
+//        if (!mInterceptFinish) {
+//            super.finish();
+//        }
+//    }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void detach() {
         release();
     }
 
@@ -280,18 +281,19 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
     /**
      * 是否可以滑动关闭
      */
-    public boolean isSlideable() {
-        return mSlideable;
+    public boolean isSlideEnable() {
+        return mSlidable;
     }
 
     /**
      * 设置是否可以滑动关闭Activity
      */
-    public void setSlideable(boolean slideable) {
-        mSlideable = slideable;
+    @Override
+    public void enableSlide(boolean enable) {
+        mSlidable = enable;
 
         if (mSlideFrameLayout != null) {
-            mSlideFrameLayout.setSlideable(slideable);
+            mSlideFrameLayout.setSlideable(enable);
         }
     }
 
@@ -308,8 +310,8 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
      * 执行finish动作
      */
     private void doRealFinishForSlide() {
-        finish();
-        overridePendingTransition(0, 0);
+        activity.finish();
+        activity.overridePendingTransition(0, 0);
         onSlideBack();
     }
 
@@ -322,7 +324,7 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
         Activity previousActivity = getPreviousPreviewActivity();
         if (null != previousActivity) {
             //return previousActivity.findViewById(android.R.id.content);
-            ViewGroup viewGroup = (ViewGroup)previousActivity.getWindow().getDecorView();
+            ViewGroup viewGroup = (ViewGroup) previousActivity.getWindow().getDecorView();
             return viewGroup.getChildAt(0);
         }
         return null;
@@ -341,7 +343,7 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
         }
 
         if (previousActivity == null && mNeedFindActivityFlag) {
-            previousActivity = StackManager.getInstance().getPreviousActivity(this);
+            previousActivity = StackManager.getInstance().getPreviousActivity(activity);
             mPreviousActivity = previousActivity;
             if (null == previousActivity) {
                 mNeedFindActivityFlag = false;
@@ -381,7 +383,7 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
         if (activity == mPreviousActivity) {
             if (DEBUG) {
                 Log.d(TAG, "onPreviousActivityDestroyed(), previous activity destroy. Current activity = "
-                        + this.getLocalClassName() + " Previous activity = " + activity.getLocalClassName());
+                        + activity.getLocalClassName() + " Previous activity = " + activity.getLocalClassName());
             }
 
             release();
@@ -397,7 +399,7 @@ public class SlideBackActivity extends ActivityInterfaceImpl implements SlideFra
             // 找不到前一个activity，则不能滑动
             if (null == mPreviousActivity) {
                 mNeedFindActivityFlag = false;
-                setSlideable(false);
+                enableSlide(false);
             }
         }
     }

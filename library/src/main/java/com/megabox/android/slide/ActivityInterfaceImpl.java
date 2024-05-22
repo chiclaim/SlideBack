@@ -20,14 +20,14 @@ class ActivityInterfaceImpl extends AppCompatActivity implements ActivityInterfa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ActivityStackManager.addToStack(this);
+        StackManager.getInstance().push(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        ActivityStackManager.removeFromStack(this);
+        StackManager.getInstance().remove(this);
 
         if (mActivityLifecycleCallbacks != null) {
             mActivityLifecycleCallbacks.onActivityDestroyed(this);
