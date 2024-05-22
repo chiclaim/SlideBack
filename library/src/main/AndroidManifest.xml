@@ -4,7 +4,7 @@
     <application>
         <provider
             android:name=".provider.InitContentProvider"
-            android:authorities="com.megabox.android.slide.InitContentProvider"
+            android:authorities="${applicationId}.slide.InitContentProvider"
             android:exported="false"
             android:multiprocess="true" />
     </application>
