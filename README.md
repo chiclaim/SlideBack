@@ -6,10 +6,9 @@
 1. 升级 agp 4.0.0; 使用 androidx
 2. 修改 edgeRange; 整个屏幕都可以侧滑
 3. 通过 ContentProvider 自动初始化 Activity 生命周期监听
-4. 重构集成侧滑的策略：
-      a. 不需要重写 setContent
-      b. 滑动包含系统ActionBar，兼容 ActionBar 不在Activity布局中的情况
-      c. 通过组合而不是继承的方式添加侧滑功能
+4. 通过 onContentChanged 方式添加父布局
+5. 滑动包含系统 ActionBar，兼容 ActionBar 不在 Activity xml 布局中的情况
+6. 通过组合而不是继承的方式添加侧滑功能
 
 TODO
 1. 支持 RTL
