@@ -52,9 +52,9 @@ public class SlideBack implements ISlideBack, SlideFrameLayout.SlidingListener {
     private boolean mSlidable = true;
 
     /**
-     * 后面的Activity是否跟随滑动
+     * 前面的的Activity是否跟随滑动
      */
-    private boolean mPreviousActivitySlideFollow = true;
+    private boolean mPreviousActivitySlideFollow = false;
 
     /**
      * 是否打断调用{@link #finish()}方法
