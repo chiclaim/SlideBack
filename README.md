@@ -44,7 +44,7 @@ public abstract class YourBaseActivity extends AppCompatActivity {
 
 ```
 
-## 以下是 folk 之前的描述：
+## 以下是 fork 之前的描述：
 
 
 [SlideBack](https://github.com/leehong2005/SlideBack) 项目实现了类似 `iOS` 左侧滑动返回交互的功能，`Android` 平台做得最早的应该是微信，即使到了现在，有滑动返回功能的App也不是很多，就算有，做得极致的也比较少。
