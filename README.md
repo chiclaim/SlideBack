@@ -1,5 +1,53 @@
 # SlideBack 
 
+本项目 fork 自：https://github.com/codingBobo/SlideBack
+
+主要改动内容：
+1. 升级 agp 4.0.0; 使用 androidx
+2. 修改 edgeRange; 整个屏幕都可以侧滑
+3. 通过 ContentProvider 自动初始化 Activity 生命周期监听
+4. 重构集成侧滑的策略：
+      a. 不需要重写 setContent
+      b. 滑动包含系统ActionBar，兼容 ActionBar 不在Activity布局中的情况
+      c. 通过组合而不是继承的方式添加侧滑功能
+
+TODO
+1. 支持 RTL
+2. 和 FlutterBoost 混合使用时，侧滑白屏问题（需要添加 windowIsTranslucent）
+
+## 集成方式：
+
+可以通过组合的方式集成 SlideBack 功能:
+1. 在 Activity.onContentChanged 中调用 SlideBack#attach()
+2. 在 Activity.onDestroy 中调用 SlideBack#detach()
+
+```java
+public abstract class YourBaseActivity extends AppCompatActivity {
+
+    private final SlideBack slideBack = new SlideBack(this);
+
+    public void enableSlideBack(boolean flag) {
+        slideBack.enableSlide(flag);
+    }
+
+    @Override
+    public void onContentChanged() {
+        super.onContentChanged();
+        slideBack.attach();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        slideBack.detach();
+    }
+}
+
+```
+
+## 以下是 folk 之前的描述：
+
+
 [SlideBack](https://github.com/leehong2005/SlideBack) 项目实现了类似 `iOS` 左侧滑动返回交互的功能，`Android` 平台做得最早的应该是微信，即使到了现在，有滑动返回功能的App也不是很多，就算有，做得极致的也比较少。
 
 滑动返回功能目前我已经使用在自己的项目中了，也发现了不少问题，现在坑基本都填平了，一直就想放到 GitHub 上面来，迟迟等到今天是因为我认为始终还没达到一个完美的状态。该功能的实现最开始其实也从系统提供的组件中找到了一些灵感，典型的就是 `SlidePannel`，左侧菜单， Google 原生的 Android 应用基本都有这样的交互设计。站在前人的肩膀上，经过一番设计加工，也就有了现在的实现。
