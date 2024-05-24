@@ -1,8 +1,5 @@
 package com.megabox.android.slide;
 
-import android.os.Bundle;
-
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
@@ -13,12 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 public abstract class YourBaseActivity extends AppCompatActivity {
 
     private final SlideBack slideBack = new SlideBack(this);
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-//        slideBack = new SlideBack(this);
-    }
 
     public void enableSlideBack(boolean flag) {
         slideBack.enableSlide(flag);

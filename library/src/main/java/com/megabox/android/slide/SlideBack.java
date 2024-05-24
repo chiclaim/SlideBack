@@ -13,11 +13,9 @@ import android.view.ViewGroup;
  * <li> 在 Activity.onDestroy 中调用 {@link SlideBack#detach()}</li>
  * <pre>
  * public abstract class YourBaseActivity extends AppCompatActivity {
- *     private SlideBack slideBack;
- *     protected void onCreate(@Nullable Bundle savedInstanceState) {
- *         super.onCreate(savedInstanceState);
- *         slideBack = new SlideBack(this);
- *     }
+ *
+ *     private final SlideBack slideBack = new SlideBack(this);
+ *     // 可选（子类控制是否可侧滑）
  *     public void enableSlideBack(boolean flag) {
  *         slideBack.enableSlide(flag);
  *     }
@@ -25,7 +23,7 @@ import android.view.ViewGroup;
  *         super.onContentChanged();
  *         slideBack.attach();
  *     }
- *     public void onDestroy() {
+ *     protected void onDestroy() {
  *         super.onDestroy();
  *         slideBack.detach();
  *     }
@@ -322,6 +320,7 @@ public class SlideBack implements ISlideBack, SlideFrameLayout.SlidingListener {
      */
     private View getPreviousActivityContentView() {
         Activity previousActivity = getPreviousPreviewActivity();
+        Log.d(TAG, "-------getPreviousPreviewActivity:" + previousActivity);
         if (null != previousActivity) {
             //return previousActivity.findViewById(android.R.id.content);
             ViewGroup viewGroup = (ViewGroup) previousActivity.getWindow().getDecorView();
@@ -363,6 +362,7 @@ public class SlideBack implements ISlideBack, SlideFrameLayout.SlidingListener {
      */
     private void offsetPreviousSnapshot(float translateX) {
         View view = getPreviousActivityContentView();
+//        Log.d(TAG, "-------PreviousActivityContentView:" + view+", translateX:"+translateX);
         if (view == null) {
             return;
         }
