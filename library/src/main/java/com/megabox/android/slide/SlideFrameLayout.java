@@ -61,9 +61,14 @@ class SlideFrameLayout extends ViewGroup {
     private Drawable mShadowDrawable;
 
     /**
-     * 是否可以滑动
+     * 是否可以滑动（原设计不合理，哪怕设置 false，仍然可以滑动，因为在 onMeasure 又重新设置值了，所以先保留该字段，设置为常量）
      */
     private boolean mCanSlide = true;
+
+    /**
+     * 是否可以滑动
+     */
+    private boolean mSlidable = true;
 
     /**
      * 可滑动的View
@@ -214,7 +219,7 @@ class SlideFrameLayout extends ViewGroup {
      * @return true/false
      */
     public boolean isSlideable() {
-        return mCanSlide;
+        return mSlidable;
     }
 
     /**
@@ -223,7 +228,7 @@ class SlideFrameLayout extends ViewGroup {
      * @param b true/false
      */
     public void setSlideable(boolean b) {
-        mCanSlide = b;
+        mSlidable = b;
     }
 
     /**
@@ -653,6 +658,7 @@ class SlideFrameLayout extends ViewGroup {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (!mSlidable) return false;
         if (mEdgeSize > 0) {
             if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getX() > mEdgeSize) {
                 int dragState = mDragHelper.getViewDragState();
@@ -728,6 +734,7 @@ class SlideFrameLayout extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (!mSlidable) return false;
         if (mEdgeSize > 0) {
             if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getX() > mEdgeSize) {
                 return false;
