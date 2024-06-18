@@ -91,7 +91,7 @@ public class SlideBack implements ISlideBack, SlideFrameLayout.SlidingListener {
     /**
      * Activity的生命周期回调
      */
-    private Application.ActivityLifecycleCallbacks mActivityLifecycleCallbacks = new ActivityLifecycleCallbacksImpl() {
+    private final Application.ActivityLifecycleCallbacks mActivityLifecycleCallbacks = new ActivityLifecycleCallbacksImpl() {
         @Override
         public void onActivityDestroyed(Activity activity) {
             super.onActivityDestroyed(activity);
@@ -156,7 +156,7 @@ public class SlideBack implements ISlideBack, SlideFrameLayout.SlidingListener {
         mSlideFrameLayout.setSlideable(mSlidable);
         mSlideFrameLayout.setSlidingListener(this);
 
-        final ViewGroup decorView = getWrapContainer(true);
+        final ViewGroup decorView = getWrapContainer(false);
         ViewGroup decorChild = (ViewGroup) decorView.getChildAt(0);
         if (decorChild instanceof SlideFrameLayout) {
             return;
