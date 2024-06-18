@@ -11,7 +11,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
+import com.megabox.android.slide.sample.R;
 /**
  * @author lihong
  * @since 2016/10/28
@@ -20,8 +20,10 @@ public class ListViewActivity extends YourBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_list_layout);
+        ListView listView = findViewById(R.id.list_view);
 
-        ListView listView = new ListView(this);
+//        ListView listView = new ListView(this);
         listView.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
@@ -58,7 +60,7 @@ public class ListViewActivity extends YourBaseActivity {
             }
         });
 
-        setContentView(listView);
+//        setContentView(listView);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
